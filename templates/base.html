@@ -20,8 +20,11 @@
         :root {
             --bs-font-sans-serif: 'Cairo', system-ui, -apple-system, sans-serif;
             --sidebar-bg: #0f172a;
-            --sidebar-hover: #1e293b;
-            --accent-primary: #0284c7;
+            --sidebar-surface: #1e293b;
+            --sidebar-border: #334155;
+            --sidebar-text: #94a3b8;
+            --sidebar-text-active: #ffffff;
+            --accent-primary: #0ea5e9;
             --bg-canvas: #f8fafc;
             --card-border: #e2e8f0;
         }
@@ -35,33 +38,48 @@
             background-color: var(--sidebar-bg);
             color: #f8fafc;
             min-height: 100vh;
+            border-left: 1px solid #1e293b;
         }
         .sidebar .nav-link {
-            color: #94a3b8;
-            font-size: 0.95rem;
-            padding: 0.75rem 1rem;
+            color: var(--sidebar-text);
+            font-size: 0.925rem;
+            font-weight: 600;
+            padding: 0.65rem 0.9rem;
             border-radius: 0.5rem;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
         }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            color: #ffffff;
-            background-color: var(--sidebar-hover);
+        .sidebar .nav-link:hover {
+            color: #f1f5f9;
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+        .sidebar .nav-link.active {
+            color: var(--sidebar-text-active);
+            background-color: #0284c7;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
         }
         .sidebar .nav-link i {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
+            color: #94a3b8;
+        }
+        .sidebar .nav-link:hover i {
+            color: #38bdf8;
+        }
+        .sidebar .nav-link.active i {
+            color: #ffffff;
         }
         .brand-header {
-            padding: 1.25rem 1rem;
-            border-bottom: 1px solid #1e293b;
+            padding: 1.25rem 0.5rem 1rem 0.5rem;
+            border-bottom: 1px solid var(--sidebar-surface);
         }
         .group-selector-box {
-            background-color: #1e293b;
-            border-radius: 0.5rem;
-            padding: 0.75rem 1rem;
+            background-color: var(--sidebar-surface);
+            border: 1px solid var(--sidebar-border);
+            border-radius: 0.65rem;
+            padding: 0.75rem 0.85rem;
             margin-bottom: 1.25rem;
         }
         .main-content {
@@ -229,11 +247,19 @@
             padding: 0.55rem 0.85rem;
             font-size: 0.95rem;
             background-color: #ffffff;
+            color: #0f172a !important;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
             transition: all 0.2s ease-in-out;
             min-height: 44px;
             display: flex;
             align-items: center;
+        }
+        .ts-control > input {
+            color: #0f172a !important;
+        }
+        .ts-control .item {
+            color: #0f172a !important;
+            font-weight: 600;
         }
         .ts-wrapper:hover .ts-control {
             border-color: #cbd5e1;
@@ -245,6 +271,7 @@
         .ts-dropdown {
             border-radius: 0.75rem;
             border: 1px solid #cbd5e1;
+            background-color: #ffffff !important;
             box-shadow: 0 14px 30px -4px rgba(15, 23, 42, 0.15);
             padding: 0.4rem;
             font-size: 0.925rem;
@@ -254,16 +281,17 @@
         .ts-dropdown .option {
             padding: 0.55rem 0.85rem;
             border-radius: 0.45rem;
+            color: #1e293b !important;
             transition: all 0.15s ease;
         }
         .ts-dropdown .active {
-            background-color: #f0fdf4;
-            color: #166534;
+            background-color: #f1f5f9 !important;
+            color: #0284c7 !important;
             font-weight: 600;
         }
         .ts-dropdown .option:hover {
-            background-color: #f1f5f9;
-            color: #0284c7;
+            background-color: #f8fafc !important;
+            color: #0284c7 !important;
         }
         /* Tom Select RTL arrow fix */
         .ts-wrapper.single .ts-control::after {
@@ -301,29 +329,32 @@
             </div>
 
             <div class="brand-header text-center mb-3 d-none d-md-block">
-                <h5 class="fw-bold mb-1 text-white"><i class="bi bi-wallet2 text-info me-2"></i>إدارة الشراكة</h5>
-                <small class="text-secondary">منظومة الحسابات ومجموعات العمل</small>
+                <div class="d-inline-flex align-items-center justify-content-center p-2 rounded-circle mb-2" style="background-color: rgba(14, 165, 233, 0.12);">
+                    <i class="bi bi-wallet2 text-info fs-4"></i>
+                </div>
+                <h5 class="fw-bold mb-0 text-white">إدارة الشراكة</h5>
+                <small class="text-secondary" style="font-size: 0.78rem;">منظومة الحسابات ومجموعات العمل</small>
             </div>
 
             <!-- Group Selector Dropdown -->
-            <div class="group-selector-box">
+            <div class="group-selector-box shadow-sm">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-secondary small fw-semibold">مساحة العمل:</span>
-                    <a href="{% url 'finance:group_list' %}" class="badge bg-secondary-subtle text-info text-decoration-none border border-secondary">
+                    <span class="text-secondary small fw-semibold" style="font-size: 0.8rem;">مساحة العمل:</span>
+                    <a href="{% url 'finance:group_list' %}" class="badge bg-secondary-subtle text-info text-decoration-none border border-secondary" style="font-size: 0.75rem;">
                         <i class="bi bi-gear-fill me-1"></i>إدارة
                     </a>
                 </div>
                 <div class="dropdown">
-                    <button class="btn btn-dark btn-sm w-100 text-start dropdown-toggle d-flex justify-content-between align-items-center border-secondary py-2 px-3 shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-sm w-100 text-start dropdown-toggle d-flex justify-content-between align-items-center border-0 py-2 px-2 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #0f172a; border-radius: 0.5rem; color: #f8fafc;">
                         <div class="d-flex align-items-center gap-2 text-truncate">
-                            <span class="badge bg-info-subtle text-info rounded-circle p-1">
+                            <span class="text-info fs-6">
                                 <i class="bi {% if current_group.group_type == 'PERSONAL' %}bi-person-fill{% elif current_group.group_type == 'PARTNERSHIP' %}bi-people-fill{% else %}bi-building-fill{% endif %}"></i>
                             </span>
-                            <span class="text-truncate fw-bold text-white">{{ current_group.name|default:"اختر مجموعة" }}</span>
+                            <span class="text-truncate fw-bold text-white small">{{ current_group.name|default:"اختر مجموعة" }}</span>
                         </div>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark shadow-lg w-100 py-2 border-secondary" style="max-height: 280px; overflow-y: auto;">
-                        <li class="dropdown-header text-muted small fw-bold px-3">التبديل إلى مساحة عمل:</li>
+                        <li class="dropdown-header text-secondary small fw-bold px-3">التبديل إلى مساحة عمل:</li>
                         {% for m in user_memberships %}
                             <li>
                                 <a class="dropdown-item py-2 px-3 d-flex justify-content-between align-items-center {% if m.group.id == current_group.id %}active bg-primary text-white{% endif %}" href="{% url 'finance:switch_group' m.group.id %}">
@@ -401,15 +432,15 @@
                 </li>
             </ul>
 
-            <hr class="border-secondary my-3">
+            <hr class="border-secondary border-opacity-25 my-3">
             <div class="dropdown">
-                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle p-2 rounded hover-bg-dark border border-secondary border-opacity-25 shadow-sm" data-bs-toggle="dropdown" aria-expanded="false">
-                    <div class="bg-primary bg-opacity-25 rounded-circle p-1 me-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
-                        <i class="bi bi-person-circle fs-5 text-info"></i>
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle p-2 rounded transition-all" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: var(--sidebar-surface); border: 1px solid var(--sidebar-border);">
+                    <div class="rounded-circle me-2 d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px; background-color: #0284c7; font-size: 0.85rem; font-weight: bold;">
+                        {{ user.username|slice:":1"|upper }}
                     </div>
                     <div class="d-flex flex-column text-truncate">
-                        <strong class="text-truncate text-white small">{{ user.get_full_name|default:user.username }}</strong>
-                        <span class="text-secondary" style="font-size: 0.75rem;">@{{ user.username }}</span>
+                        <strong class="text-truncate text-white small" style="font-size: 0.85rem;">{{ user.get_full_name|default:user.username }}</strong>
+                        <span class="text-secondary" style="font-size: 0.72rem;">@{{ user.username }}</span>
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark text-small shadow-lg border-secondary py-2">
@@ -425,13 +456,13 @@
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
             <!-- Active Group Banner -->
             {% if current_group %}
-            <div class="alert alert-light border shadow-sm d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center py-2 px-3 mb-4 rounded-3 gap-2">
+            <div class="card border-0 shadow-sm py-2 px-3 mb-4 rounded-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2" style="background-color: #ffffff; border: 1px solid #e2e8f0 !important;">
                 <div class="d-flex align-items-center gap-2">
                     <i class="bi bi-layers-fill text-primary fs-5"></i>
-                    <span class="small">مساحة العمل: <strong class="text-dark">{{ current_group.name }}</strong> ({{ current_group.get_group_type_display }})</span>
+                    <span class="small text-muted">مساحة العمل: <strong class="text-dark">{{ current_group.name }}</strong> ({{ current_group.get_group_type_display }})</span>
                 </div>
                 <div class="d-flex gap-2 align-items-center">
-                    <span class="badge bg-light text-secondary border">العملة: {{ current_group.currency }}</span>
+                    <span class="badge bg-light text-dark border">العملة: {{ current_group.currency }}</span>
                     <a href="{% url 'finance:group_list' %}" class="btn btn-outline-secondary btn-sm py-1">تبديل المساحة</a>
                 </div>
             </div>
