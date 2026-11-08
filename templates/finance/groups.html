@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}المجموعات المالية ومساحات العمل - نظام إدارة الشراكة{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+    <div>
+        <h3 class="fw-bold mb-1">المجموعات المالية ومساحات العمل المستقلة</h3>
+        <span class="text-muted small">إدارة وتوزيع الحسابات بين المالية الشخصية، الشراكات، ومشاريع الأعمال</span>
+    </div>
+</div>
+
+<!-- Pending Invitations Alert -->
+{% if invitations %}
+<div class="card card-custom p-4 mb-4 border-start border-4 border-warning shadow-sm">
+    <h5 class="fw-bold text-warning-emphasis mb-3"><i class="bi bi-envelope-open me-2"></i>لديك دعوات انضمام معلقة لمجموعات مالية</h5>
+    <div class="list-group">
+        {% for inv in invitations %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ inv.group.name }}</strong> ({{ inv.group.get_group_type_display }})
+                    <br><small class="text-muted">دعوة بواسطة: {{ inv.invited_by.username }} | الدور: {{ inv.get_role_display }}</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'finance:respond_invitation' inv.id 'accept' %}" class="btn btn-success btn-sm px-3 fw-bold">قبول الانضمام</a>
+                    <a href="{% url 'finance:respond_invitation' inv.id 'reject' %}" class="btn btn-outline-danger btn-sm px-3">رفض</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <!-- Active Groups List -->
+    <div class="col-lg-7">
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2">المجموعات المالية التي تنتمي إليها</h5>
+            <div class="row g-3">
+                {% for m in memberships %}
+                <div class="col-12">
+                    <div class="p-3 rounded border {% if m.group.id == active_group.id %}border-primary bg-primary-subtle{% else %}bg-white{% endif %} d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <h6 class="fw-bold mb-0 text-dark">{{ m.group.name }}</h6>
+                                {% if m.group.id == active_group.id %}
+                                    <span class="badge bg-primary">المساحة النشطة حالياً</span>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">
+                                النوع: {{ m.group.get_group_type_display }} | دورك: <span class="badge bg-secondary-subtle text-dark">{{ m.get_role_display }}</span> | العملة: {{ m.group.currency }}
+                            </small>
+                            {% if m.group.description %}
+                                <div class="small text-secondary mt-1">{{ m.group.description }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-2">
+                            {% if m.group.id != active_group.id %}
+                                <a href="{% url 'finance:switch_group' m.group.id %}" class="btn btn-outline-primary btn-sm fw-bold">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> تفعيل مساحة العمل
+                                </a>
+                            {% endif %}
+                            {% if m.can_manage_members %}
+                                <a href="{% url 'finance:group_members' m.group.id %}" class="btn btn-light border btn-sm" title="إدارة الأعضاء">
+                                    <i class="bi bi-people-fill"></i>
+                                </a>
+                            {% endif %}
+                            {% if m.can_manage_settings %}
+                                <a href="{% url 'finance:group_settings' m.group.id %}" class="btn btn-light border btn-sm" title="إعدادات المجموعة">
+                                    <i class="bi bi-gear-fill"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                    <p class="text-muted text-center py-4">لم يتم الانضمام إلى أي مجموعات مالية بعد.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Create New Financial Group -->
+    <div class="col-lg-5">
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2">إنشاء مجموعة مالية جديدة</h5>
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="create_group" value="1">
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">اسم المجموعة المالية *</label>
+                    {{ form.name }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">نوع المجموعة *</label>
+                    {{ form.group_type }}
+                    <small class="text-muted">المجموعات الشخصية خاصة بك تماماً، بينما مجموعات الشراكة والأعمال تتيح إضافة شركاء ومحاسبين.</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">العملة الافتراضية *</label>
+                    {{ form.currency }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">وصف المجموعة</label>
+                    {{ form.description }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">شعار المجموعة (اختياري)</label>
+                    {{ form.logo }}
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-bold">
+                    <i class="bi bi-plus-circle me-1"></i> إنشاء مساحة العمل المالية
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}إدارة الديون والقروض - نظام إدارة الشراكة{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4 border-bottom pb-3">
+    <div>
+        <h3 class="fw-bold mb-1 h4">إدارة الديون والالتزامات المالية</h3>
+        <span class="text-muted small">متابعة الأموال المقترضة والممنوحة للغير وحالات السداد</span>
+    </div>
+    <div class="w-100 w-sm-auto">
+        <a href="{% url 'finance:loan_create' %}" class="btn btn-primary btn-sm w-100 w-sm-auto"><i class="bi bi-plus-lg me-1"></i> تسجيل قرض / دين جديد</a>
+    </div>
+</div>
+
+<!-- Debt Balances Summary -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6">
+        <div class="card card-custom p-3 border-start border-4 border-danger">
+            <span class="text-muted small fw-bold">إجمالي الديون المستحقة علينا (للغير)</span>
+            <h4 class="fw-bold text-danger my-1">{{ borrowed_total|floatformat:2 }}</h4>
+            <span class="small text-muted">أموال اقترضتها الشراكة وتلتزم بإعادتها للمقرضين</span>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="card card-custom p-3 border-start border-4 border-warning">
+            <span class="text-muted small fw-bold">إجمالي الأموال الممنوحة للغير (مستحقة لنا)</span>
+            <h4 class="fw-bold text-primary my-1">{{ lent_total|floatformat:2 }}</h4>
+            <span class="small text-muted">قروض منحناها لأشخاص وجهات وننتظر استردادها</span>
+        </div>
+    </div>
+</div>
+
+<!-- Filter tabs -->
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="{% url 'finance:loan_list' %}" class="btn btn-sm {% if not request.GET.type %}btn-dark{% else %}btn-outline-secondary{% endif %}">الكل</a>
+    <a href="?type=BORROWED" class="btn btn-sm {% if request.GET.type == 'BORROWED' %}btn-danger{% else %}btn-outline-danger{% endif %}">قروض مستحقة علينا</a>
+    <a href="?type=LENT" class="btn btn-sm {% if request.GET.type == 'LENT' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">أموال أقرضناها للغير</a>
+</div>
+
+<!-- Loans Table -->
+<div class="card card-custom p-3">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 table-custom table-mobile-cards">
+            <thead>
+                <tr>
+                    <th>المعرف</th>
+                    <th>النوع</th>
+                    <th>الطرف الآخر</th>
+                    <th>أصل المبلغ</th>
+                    <th>المسدد</th>
+                    <th>المتبقي</th>
+                    <th>الحالة</th>
+                    <th>تاريخ الاستحقاق</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loan in loans %}
+                    <tr>
+                        <td data-label="المعرف" class="fw-bold">#{{ loan.id }}</td>
+                        <td data-label="النوع">
+                            {% if loan.loan_type == 'BORROWED' %}
+                                <span class="badge bg-danger-subtle text-danger">مستحق علينا</span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-warning-emphasis">أقرضناه للغير</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="الطرف الآخر" class="fw-bold">
+                            <a href="{% url 'finance:contact_detail' loan.contact.id %}" class="text-decoration-none">
+                                {{ loan.contact.name }}
+                            </a>
+                        </td>
+                        <td data-label="أصل المبلغ">{{ loan.original_amount|floatformat:2 }} <small class="text-muted">{{ loan.currency }}</small></td>
+                        <td data-label="المسدد" class="text-success">{{ loan.principal_repaid|floatformat:2 }} <small class="text-muted">{{ loan.currency }}</small></td>
+                        <td data-label="المتبقي" class="fw-bold text-danger">{{ loan.remaining_balance|floatformat:2 }} <small class="text-muted">{{ loan.currency }}</small></td>
+                        <td data-label="الحالة">
+                            {% if loan.status == 'PAID' %}
+                                <span class="badge bg-success">تم السداد بالكامل</span>
+                            {% elif loan.status == 'PARTIAL' %}
+                                <span class="badge bg-info text-dark">سداد جزئي</span>
+                            {% elif loan.status == 'OVERDUE' %}
+                                <span class="badge bg-danger">متأخر</span>
+                            {% else %}
+                                <span class="badge bg-secondary">قائم</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="تاريخ الاستحقاق">{{ loan.due_date|date:"Y-m-d"|default:"غير محدد" }}</td>
+                        <td data-label="الإجراءات">
+                            <a href="{% url 'finance:loan_detail' loan.id %}" class="btn btn-sm btn-outline-primary w-100 w-md-auto">
+                                <i class="bi bi-eye me-1"></i> التفاصيل والسداد
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="9" class="text-center text-muted py-4">لا توجد ديون مسجلة.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

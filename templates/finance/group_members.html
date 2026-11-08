@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}إدارة أعضاء وشركاء {{ group.name }} - نظام إدارة الشراكة{% endblock %}
+
+{% block content %}
+<div class="mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
+    <div>
+        <a href="{% url 'finance:group_list' %}" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-right"></i> قائمة مساحات العمل</a>
+        <h3 class="fw-bold mb-0">أعضاء وشركاء: <span class="text-primary">{{ group.name }}</span></h3>
+        <span class="text-muted small">إدارة الحسابات المشتركة، الشركاء الخارجيين، ونسب الشراكة ورؤوس الأموال</span>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Current Members & Partners Table -->
+    <div class="col-lg-7">
+        <div class="card card-custom p-4 mb-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2"><i class="bi bi-people-fill text-primary me-2"></i>الأعضاء والشركاء الحاليون</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 table-custom table-mobile-cards">
+                    <thead>
+                        <tr>
+                            <th>الاسم / العضو</th>
+                            <th>نوع الحساب</th>
+                            <th>الدور</th>
+                            <th>رأس المال الحالي</th>
+                            <th>نسبة الأرباح</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in members %}
+                            <tr>
+                                <td data-label="الاسم / العضو">
+                                    <strong class="text-dark">{{ m.get_name }}</strong>
+                                    {% if m.phone %}<br><small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ m.phone }}</small>{% endif %}
+                                </td>
+                                <td data-label="نوع الحساب">
+                                    {% if m.user %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-person-check me-1"></i>حساب مسجل</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-dark border"><i class="bi bi-person-slash me-1"></i>شريك خارجي</span>
+                                    {% endif %}
+                                </td>
+                                <td data-label="الدور">
+                                    <span class="badge {% if m.role == 'OWNER' %}bg-danger{% elif m.role == 'ADMIN' %}bg-primary{% elif m.role == 'ACCOUNTANT' %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ m.get_role_display }}
+                                    </span>
+                                </td>
+                                <td data-label="رأس المال الحالي" class="fw-bold text-primary">{{ m.current_capital|floatformat:2 }} {{ group.currency }}</td>
+                                <td data-label="نسبة الأرباح">
+                                    {% if m.profit_share_pct > 0 %}
+                                        <span class="badge bg-info text-dark">{{ m.profit_share_pct }}%</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td data-label="الإجراء">
+                                    {% if m.role != 'OWNER' and membership.can_manage_members and m.user != request.user %}
+                                        <a href="{% url 'finance:remove_member' group.id m.id %}" class="btn btn-outline-danger btn-sm py-1 px-3 w-100 w-md-auto" onclick="return confirm('هل أنت متأكد من إزالة هذا العضو/الشريك؟');">إزالة</a>
+                                    {% else %}
+                                        <span class="text-muted small">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted py-3">لا يوجد أعضاء مضافون.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pending Invites List -->
+        {% if pending_invites %}
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2 text-warning"><i class="bi bi-envelope-open me-2"></i>الدعوات المرسلة المعلقة لمستخدمين مسجلين</h5>
+            <div class="list-group">
+                {% for inv in pending_invites %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ inv.invited_user.username }}</strong> ({{ inv.invited_user.email|default:"لا يوجد بريد" }})
+                            <br><small class="text-muted">الدور المقترح: {{ inv.get_role_display }} | أُرسلت بتاريخ: {{ inv.created_at|date:"Y-m-d" }}</small>
+                        </div>
+                        <span class="badge bg-warning text-dark">في انتظار موافقة المستخدم</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Forms for Adding Members / External Partners -->
+    <div class="col-lg-5">
+        <!-- Tab navigation -->
+        <ul class="nav nav-pills mb-3 nav-justified" id="memberTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold small" id="external-tab" data-bs-toggle="pill" data-bs-target="#external-partner-pane" type="button" role="tab">
+                    <i class="bi bi-person-plus me-1"></i> إضافة شريك (ليس لديه حساب)
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold small" id="invite-tab" data-bs-toggle="pill" data-bs-target="#invite-user-pane" type="button" role="tab">
+                    <i class="bi bi-send me-1"></i> دعوة مستخدم بالمنصة
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="memberTabsContent">
+            <!-- Form 1: Add External Partner without account -->
+            <div class="tab-pane fade show active" id="external-partner-pane" role="tabpanel">
+                <div class="card card-custom p-4 border-top border-3 border-primary">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-person-fill-add text-primary fs-4"></i>
+                        <div>
+                            <h6 class="fw-bold mb-0">إضافة شريك مالي مباشرة</h6>
+                            <small class="text-muted">لأي شريك لا يملك حساباً بالمنصة</small>
+                        </div>
+                    </div>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="add_external_partner" value="1">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">اسم الشريك الكامل *</label>
+                            {{ external_form.display_name }}
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">رقم الجوال</label>
+                                {{ external_form.phone }}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">البريد الإلكتروني</label>
+                                {{ external_form.email }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">الدور في المجموعة</label>
+                            {{ external_form.role }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">رأس المال التأسيسي المساهم به</label>
+                            {{ external_form.initial_capital }}
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">نسبة الملكية %</label>
+                                {{ external_form.equity_share_pct }}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">نسبة الأرباح %</label>
+                                {{ external_form.profit_share_pct }}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">
+                            <i class="bi bi-check-circle me-1"></i> حفظ وتوثيق الشريك في المجموعة
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Form 2: Invite existing registered user -->
+            <div class="tab-pane fade" id="invite-user-pane" role="tabpanel">
+                <div class="card card-custom p-4 border-top border-3 border-info">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-send text-info fs-4"></i>
+                        <div>
+                            <h6 class="fw-bold mb-0">دعوة مستخدم مسجل في المنصة</h6>
+                            <small class="text-muted">لإعطائه حق الدخول والتصفح حسب الصلاحية</small>
+                        </div>
+                    </div>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="invite_user" value="1">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">اسم المستخدم أو البريد الإلكتروني *</label>
+                            {{ form.username_or_email }}
+                            <small class="text-muted">يجب أن يكون المستخدم مسجلاً بالفعل.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">الدور المقترح في المجموعة *</label>
+                            {{ form.role }}
+                        </div>
+                        <button type="submit" class="btn btn-info w-100 fw-bold text-white">
+                            <i class="bi bi-send me-1"></i> إرسال دعوة الانضمام
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

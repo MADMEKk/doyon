@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}المشاريع والأعمال - نظام إدارة الشراكة{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+    <div>
+        <h3 class="fw-bold mb-1">المشاريع وربحية الأعمال</h3>
+        <span class="text-muted small">تتبع إيرادات ومصروفات وقروض كل مشروع بشكل مستقل</span>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Projects List & Summaries -->
+    <div class="col-lg-7">
+        <div class="row g-3">
+            {% for p in project_summaries %}
+            <div class="col-12">
+                <div class="card card-custom p-4 shadow-sm border-start border-4 {% if p.net_profit >= 0 %}border-success{% else %}border-danger{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="fw-bold mb-0">
+                            <a href="{% url 'finance:project_detail' p.project.id %}" class="text-decoration-none text-dark">
+                                {{ p.project.name }}
+                            </a>
+                        </h5>
+                        <span class="badge bg-light text-dark border">{{ p.project.get_status_display }}</span>
+                    </div>
+                    {% if p.project.description %}
+                        <p class="text-muted small mb-3">{{ p.project.description }}</p>
+                    {% endif %}
+
+                    <div class="row g-2 text-center my-1">
+                        <div class="col-12 col-sm-4">
+                            <div class="p-2 bg-light rounded">
+                                <small class="text-muted d-block">إيرادات المشروع</small>
+                                <strong class="text-success">{{ p.revenue|floatformat:2 }} {{ group.currency }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-4">
+                            <div class="p-2 bg-light rounded">
+                                <small class="text-muted d-block">مصروفات المشروع</small>
+                                <strong class="text-danger">{{ p.expenses|floatformat:2 }} {{ group.currency }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-4">
+                            <div class="p-2 bg-light rounded">
+                                <small class="text-muted d-block">صافي الربح / الخسارة</small>
+                                <strong class="{% if p.net_profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                    {{ p.net_profit|floatformat:2 }} {{ group.currency }}
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top small text-muted">
+                        <span>قروض قائمة للمشروع: <strong>{{ p.loan_remaining|floatformat:2 }}</strong></span>
+                        <a href="{% url 'finance:project_detail' p.project.id %}" class="btn btn-outline-primary btn-sm">عرض المعاملات والتقارير</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                <div class="col-12"><p class="text-muted text-center py-4">لم يتم إنشاء أي مشاريع بعد.</p></div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Create Project Form -->
+    <div class="col-lg-5">
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2">إنشاء مشروع جديد</h5>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">اسم المشروع *</label>
+                    {{ form.name }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">وصف المشروع</label>
+                    {{ form.description }}
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-bold">الحالة *</label>
+                        {{ form.status }}
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-bold">الميزانية التقديرية</label>
+                        {{ form.initial_budget }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-bold">تاريخ البدء *</label>
+                        {{ form.start_date }}
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-bold">تاريخ الانتهاء</label>
+                        {{ form.end_date }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">الشركاء المشاركون</label>
+                    {{ form.partners }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">ملاحظات</label>
+                    {{ form.notes }}
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-bold">حفظ المشروع</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}الملف المالي: {{ contact.name }} - نظام إدارة الشراكة{% endblock %}
+
+{% block content %}
+<div class="mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
+    <div>
+        <a href="{% url 'finance:contact_list' %}" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-right"></i> دليل جهات الاتصال</a>
+        <h3 class="fw-bold mb-0">{{ contact.name }} <span class="badge bg-light text-dark border fs-6">{{ contact.get_category_display }}</span></h3>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card card-custom p-3 border-start border-4 border-danger">
+            <small class="text-muted fw-bold">ديون مستحقة له علينا (اقترضنا منه)</small>
+            <h4 class="fw-bold text-danger my-1">{{ borrowed_from_them|floatformat:2 }}</h4>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-custom p-3 border-start border-4 border-warning">
+            <small class="text-muted fw-bold">ديون مستحقة لنا عليه (أقرضناه)</small>
+            <h4 class="fw-bold text-primary my-1">{{ lent_to_them|floatformat:2 }}</h4>
+        </div>
+    </div>
+</div>
+
+<div class="card card-custom p-4 mb-4">
+    <h5 class="fw-bold mb-3 border-bottom pb-2">عقود القروض والديون المرتبطة</h5>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 table-custom table-mobile-cards">
+            <thead>
+                <tr>
+                    <th>المعرف</th>
+                    <th>النوع</th>
+                    <th>المبلغ الأصلي</th>
+                    <th>المسدد</th>
+                    <th>المتبقي</th>
+                    <th>الحالة</th>
+                    <th>الإجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loan in loans %}
+                    <tr>
+                        <td data-label="المعرف" class="fw-bold">#{{ loan.id }}</td>
+                        <td data-label="النوع">{{ loan.get_loan_type_display }}</td>
+                        <td data-label="المبلغ الأصلي">{{ loan.original_amount|floatformat:2 }} <small class="text-muted">{{ loan.currency }}</small></td>
+                        <td data-label="المسدد" class="text-success">{{ loan.principal_repaid|floatformat:2 }} <small class="text-muted">{{ loan.currency }}</small></td>
+                        <td data-label="المتبقي" class="text-danger fw-bold">{{ loan.remaining_balance|floatformat:2 }} <small class="text-muted">{{ loan.currency }}</small></td>
+                        <td data-label="الحالة"><span class="badge bg-light text-dark border">{{ loan.get_status_display }}</span></td>
+                        <td data-label="الإجراء"><a href="{% url 'finance:loan_detail' loan.id %}" class="btn btn-sm btn-outline-primary w-100 w-md-auto">عرض</a></td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7" class="text-center text-muted py-3">لا توجد قروض مسجلة مع هذا الطرف.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

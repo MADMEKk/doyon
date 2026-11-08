@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}نظام الإدارة المالية للشراكة ومساحات العمل{% endblock %}</title>
+    
+    <!-- Bootstrap 5 RTL CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Tom Select (Fast, lightweight searchable dropdowns with RTL support) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bs-font-sans-serif: 'Cairo', system-ui, -apple-system, sans-serif;
+            --sidebar-bg: #0f172a;
+            --sidebar-hover: #1e293b;
+            --accent-primary: #0284c7;
+            --bg-canvas: #f8fafc;
+            --card-border: #e2e8f0;
+        }
+        body {
+            font-family: var(--bs-font-sans-serif);
+            background-color: var(--bg-canvas);
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        .sidebar {
+            background-color: var(--sidebar-bg);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+        .sidebar .nav-link {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: #ffffff;
+            background-color: var(--sidebar-hover);
+        }
+        .sidebar .nav-link i {
+            font-size: 1.15rem;
+        }
+        .brand-header {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid #1e293b;
+        }
+        .group-selector-box {
+            background-color: #1e293b;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .main-content {
+            padding: 1.25rem;
+        }
+        @media (min-width: 768px) {
+            .main-content {
+                padding: 2rem;
+            }
+        }
+        .card-custom {
+            border: 1px solid var(--card-border);
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            background: #ffffff;
+        }
+        .table-custom th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.85rem;
+            border-bottom: 2px solid #cbd5e1;
+            white-space: nowrap;
+        }
+        .money-badge-positive {
+            color: #15803d;
+            background-color: #dcfce7;
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.375rem;
+            font-weight: 700;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .money-badge-negative {
+            color: #b91c1c;
+            background-color: #fee2e2;
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.375rem;
+            font-weight: 700;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        /* Mobile Navbar */
+        .mobile-top-bar {
+            background-color: var(--sidebar-bg);
+            border-bottom: 1px solid #1e293b;
+        }
+        /* Smooth touch scrolling for tables */
+        .table-responsive {
+            -webkit-overflow-scrolling: touch;
+        }
+        /* Mobile Table Card Transformation */
+        @media (max-width: 767.98px) {
+            .table-mobile-cards {
+                border: 0;
+            }
+            .table-mobile-cards thead {
+                display: none;
+            }
+            .table-mobile-cards tr {
+                display: block;
+                margin-bottom: 0.85rem;
+                background-color: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 0.65rem;
+                padding: 0.75rem 0.9rem;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            }
+            .table-mobile-cards td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid #f1f5f9;
+                padding: 0.45rem 0;
+                font-size: 0.875rem;
+                text-align: left;
+            }
+            .table-mobile-cards td:last-child {
+                border-bottom: 0;
+                padding-bottom: 0;
+                margin-top: 0.35rem;
+            }
+            .table-mobile-cards td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: #64748b;
+                margin-inline-end: 0.75rem;
+                text-align: right;
+                white-space: nowrap;
+                font-size: 0.825rem;
+            }
+            .table-mobile-cards td > * {
+                max-width: 65%;
+            }
+            .table-mobile-cards td > .btn, 
+            .table-mobile-cards td > .badge, 
+            .table-mobile-cards td > span {
+                max-width: 100%;
+            }
+        }
+        /* --- Ultra-Clean Modern Dropdown & Select Styling --- */
+        /* Standard Bootstrap Form Selects */
+        .form-select {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 0.6rem;
+            padding: 0.55rem 2.25rem 0.55rem 0.85rem;
+            font-size: 0.95rem;
+            background-color: #ffffff;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .form-select:hover {
+            border-color: #cbd5e1;
+        }
+        .form-select:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+            outline: none;
+        }
+
+        /* Bootstrap Dropdown Menus (Dark & Light) */
+        .dropdown-menu {
+            border-radius: 0.75rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.06);
+            padding: 0.5rem;
+            animation: dropdownFadeIn 0.18s ease-out;
+        }
+        .dropdown-menu-dark {
+            background-color: #1e293b;
+            border-color: #334155;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+        }
+        .dropdown-item {
+            border-radius: 0.5rem;
+            padding: 0.55rem 0.85rem;
+            font-size: 0.9rem;
+            transition: all 0.15s ease;
+        }
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: #f1f5f9;
+            color: #0284c7;
+            transform: translateX(-2px);
+        }
+        .dropdown-menu-dark .dropdown-item:hover, .dropdown-menu-dark .dropdown-item:focus {
+            background-color: #334155;
+            color: #ffffff;
+            transform: translateX(-2px);
+        }
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Tom Select Styling Customization for RTL & Modern theme */
+        .ts-wrapper.form-select, .ts-wrapper.single .ts-control {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 0.6rem;
+            padding: 0.55rem 0.85rem;
+            font-size: 0.95rem;
+            background-color: #ffffff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease-in-out;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+        .ts-wrapper:hover .ts-control {
+            border-color: #cbd5e1;
+        }
+        .ts-wrapper.focus .ts-control {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+        .ts-dropdown {
+            border-radius: 0.75rem;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 14px 30px -4px rgba(15, 23, 42, 0.15);
+            padding: 0.4rem;
+            font-size: 0.925rem;
+            z-index: 1060;
+            margin-top: 4px;
+        }
+        .ts-dropdown .option {
+            padding: 0.55rem 0.85rem;
+            border-radius: 0.45rem;
+            transition: all 0.15s ease;
+        }
+        .ts-dropdown .active {
+            background-color: #f0fdf4;
+            color: #166534;
+            font-weight: 600;
+        }
+        .ts-dropdown .option:hover {
+            background-color: #f1f5f9;
+            color: #0284c7;
+        }
+        /* Tom Select RTL arrow fix */
+        .ts-wrapper.single .ts-control::after {
+            border-color: #64748b transparent transparent transparent !important;
+            margin-top: -3px;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<!-- Mobile Top Navigation Bar -->
+<header class="d-md-none mobile-top-bar text-white px-3 py-2 d-flex justify-content-between align-items-center sticky-top shadow-sm">
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-outline-light btn-sm border-0 px-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-label="تبديل القائمة">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <span class="fw-bold fs-6 text-white text-truncate"><i class="bi bi-wallet2 text-info me-1"></i>إدارة الشراكة</span>
+    </div>
+    {% if current_group %}
+    <a href="{% url 'finance:group_list' %}" class="badge bg-secondary text-light text-decoration-none text-truncate" style="max-width: 140px;">
+        <i class="bi bi-layers-fill me-1"></i>{{ current_group.name }}
+    </a>
+    {% endif %}
+</header>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation (Offcanvas on Mobile, Static Sidebar on md+) -->
+        <div class="offcanvas-md offcanvas-start sidebar col-md-3 col-lg-2 d-print-none p-3" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel" style="z-index: 1045;">
+            <div class="d-flex justify-content-between align-items-center d-md-none mb-3 pb-2 border-bottom border-secondary">
+                <h6 class="text-white fw-bold mb-0" id="sidebarMenuLabel"><i class="bi bi-wallet2 text-info me-2"></i>القائمة الرئيسية</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="إغلاق"></button>
+            </div>
+
+            <div class="brand-header text-center mb-3 d-none d-md-block">
+                <h5 class="fw-bold mb-1 text-white"><i class="bi bi-wallet2 text-info me-2"></i>إدارة الشراكة</h5>
+                <small class="text-secondary">منظومة الحسابات ومجموعات العمل</small>
+            </div>
+
+            <!-- Group Selector Dropdown -->
+            <div class="group-selector-box">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-semibold">مساحة العمل:</span>
+                    <a href="{% url 'finance:group_list' %}" class="badge bg-secondary-subtle text-info text-decoration-none border border-secondary">
+                        <i class="bi bi-gear-fill me-1"></i>إدارة
+                    </a>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-dark btn-sm w-100 text-start dropdown-toggle d-flex justify-content-between align-items-center border-secondary py-2 px-3 shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="d-flex align-items-center gap-2 text-truncate">
+                            <span class="badge bg-info-subtle text-info rounded-circle p-1">
+                                <i class="bi {% if current_group.group_type == 'PERSONAL' %}bi-person-fill{% elif current_group.group_type == 'PARTNERSHIP' %}bi-people-fill{% else %}bi-building-fill{% endif %}"></i>
+                            </span>
+                            <span class="text-truncate fw-bold text-white">{{ current_group.name|default:"اختر مجموعة" }}</span>
+                        </div>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark shadow-lg w-100 py-2 border-secondary" style="max-height: 280px; overflow-y: auto;">
+                        <li class="dropdown-header text-muted small fw-bold px-3">التبديل إلى مساحة عمل:</li>
+                        {% for m in user_memberships %}
+                            <li>
+                                <a class="dropdown-item py-2 px-3 d-flex justify-content-between align-items-center {% if m.group.id == current_group.id %}active bg-primary text-white{% endif %}" href="{% url 'finance:switch_group' m.group.id %}">
+                                    <div class="d-flex align-items-center gap-2 text-truncate">
+                                        <i class="bi {% if m.group.group_type == 'PERSONAL' %}bi-person{% elif m.group.group_type == 'PARTNERSHIP' %}bi-people{% else %}bi-building{% endif %}"></i>
+                                        <span class="text-truncate">{{ m.group.name }}</span>
+                                    </div>
+                                    <span class="badge bg-black bg-opacity-25 ms-1">{{ m.group.currency }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                        <li><hr class="dropdown-divider border-secondary my-1"></li>
+                        <li>
+                            <a class="dropdown-item text-info py-2 px-3 fw-bold" href="{% url 'finance:group_list' %}">
+                                <i class="bi bi-plus-circle me-2"></i>إنشاء مساحة جديدة
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="{% url 'finance:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <i class="bi bi-speedometer2"></i> لوحة التحكم
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'finance:transaction_list' %}" class="nav-link {% if request.resolver_match.url_name == 'transaction_list' %}active{% endif %}">
+                        <i class="bi bi-receipt"></i> المعاملات المالية
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'finance:loan_list' %}" class="nav-link {% if 'loan' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-bank"></i> الديون والقروض
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'finance:account_list' %}" class="nav-link {% if 'account' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-safe"></i> الحسابات والصناديق
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'finance:group_members' current_group.id %}" class="nav-link {% if 'group_members' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-people-fill"></i> أعضاء وشركاء المجموعة
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'finance:project_list' %}" class="nav-link {% if 'project' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-kanban"></i> المشاريع
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'finance:contact_list' %}" class="nav-link {% if 'contact' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-person-lines-fill"></i> جهات الاتصال
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'finance:reports' %}" class="nav-link {% if 'report' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-file-earmark-bar-graph"></i> التقارير المالية
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'finance:group_list' %}" class="nav-link {% if 'group' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-collection"></i> مساحات العمل
+                        {% if pending_invites_count > 0 %}
+                            <span class="badge bg-warning text-dark ms-auto">{{ pending_invites_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'finance:audit_logs' %}" class="nav-link {% if 'audit' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-shield-check"></i> سجل التدقيق
+                    </a>
+                </li>
+            </ul>
+
+            <hr class="border-secondary my-3">
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle p-2 rounded hover-bg-dark border border-secondary border-opacity-25 shadow-sm" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="bg-primary bg-opacity-25 rounded-circle p-1 me-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
+                        <i class="bi bi-person-circle fs-5 text-info"></i>
+                    </div>
+                    <div class="d-flex flex-column text-truncate">
+                        <strong class="text-truncate text-white small">{{ user.get_full_name|default:user.username }}</strong>
+                        <span class="text-secondary" style="font-size: 0.75rem;">@{{ user.username }}</span>
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark text-small shadow-lg border-secondary py-2">
+                    <li><a class="dropdown-item py-2" href="{% url 'finance:profile' %}"><i class="bi bi-person me-2 text-info"></i>الملف الشخصي والعملة</a></li>
+                    <li><a class="dropdown-item py-2" href="/admin/" target="_blank"><i class="bi bi-shield-lock me-2 text-warning"></i>لوحة إدارة Django</a></li>
+                    <li><hr class="dropdown-divider border-secondary my-1"></li>
+                    <li><a class="dropdown-item py-2 text-danger fw-bold" href="{% url 'finance:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>تسجيل الخروج</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Workspace -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+            <!-- Active Group Banner -->
+            {% if current_group %}
+            <div class="alert alert-light border shadow-sm d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center py-2 px-3 mb-4 rounded-3 gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-layers-fill text-primary fs-5"></i>
+                    <span class="small">مساحة العمل: <strong class="text-dark">{{ current_group.name }}</strong> ({{ current_group.get_group_type_display }})</span>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="badge bg-light text-secondary border">العملة: {{ current_group.currency }}</span>
+                    <a href="{% url 'finance:group_list' %}" class="btn btn-outline-secondary btn-sm py-1">تبديل المساحة</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Alert Messages -->
+            {% if messages %}
+                <div class="row">
+                    <div class="col-12">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% else %}
+    <div class="container py-5">
+        {% block auth_content %}{% endblock %}
+    </div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Tom Select JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Automatically initialize Tom Select for searchable dropdowns
+        document.querySelectorAll("select.searchable-select, select.ts-select").forEach(function(el) {
+            new TomSelect(el, {
+                create: false,
+                sortField: { field: "text", direction: "asc" },
+                placeholder: el.getAttribute("placeholder") || "اختر أو ابحث...",
+                allowEmptyOption: true,
+                maxOptions: 100,
+            });
+        });
+    });
+</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - نظام إدارة الشراكة{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card card-custom p-4 shadow-sm">
+            <h4 class="fw-bold mb-3 pb-2 border-bottom">{{ title }}</h4>
+
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">الحساب المالي المستخدم *</label>
+                        {{ form.account }}
+                        {% if form.account.errors %}<div class="text-danger small">{{ form.account.errors }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">التاريخ *</label>
+                        {{ form.date }}
+                        {% if form.date.errors %}<div class="text-danger small">{{ form.date.errors }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">المبلغ *</label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}<div class="text-danger small">{{ form.amount.errors }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">العملة (اختياري)</label>
+                        {{ form.currency }}
+                        <small class="text-muted">اتركه فارغاً لعملة الحساب</small>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold">سعر الصرف لعملة الأساس ({{ group.currency }})</label>
+                        {{ form.exchange_rate }}
+                        <small class="text-muted">إذا كانت العملة مختلفة، اكتب سعر الصرف</small>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold">البند / التصنيف</label>
+                        {{ form.category }}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-bold">البيان / الوصف *</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+                    </div>
+
+                    <!-- Contact / External Person Selection -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">جهة الاتصال المسجلة</label>
+                        {{ form.contact }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">أو شخص خارجي (ليس لديه حساب)</label>
+                        {{ form.external_person_name }}
+                    </div>
+
+                    {% if group.group_type != 'PERSONAL' %}
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">المشروع المرتبط</label>
+                        {{ form.project }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">الشريك المعني</label>
+                        {{ form.partner }}
+                    </div>
+                    {% endif %}
+
+                    <div class="col-12">
+                        <label class="form-label fw-bold">ملاحظات تفصيلية</label>
+                        {{ form.notes }}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-bold">مرفق / إيصال (اختياري)</label>
+                        {{ form.attachment }}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'finance:transaction_list' %}" class="btn btn-outline-secondary">إلغاء</a>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">حفظ السجل المالي</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

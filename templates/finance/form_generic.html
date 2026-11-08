@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - نظام إدارة الشراكة{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="card card-custom p-4 shadow-sm">
+            <h4 class="fw-bold mb-3 pb-2 border-bottom">{{ title }}</h4>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{{ field.label }} {% if field.field.required %}*{% endif %}</label>
+                        {{ field }}
+                        {% if field.help_text %}<small class="text-muted d-block">{{ field.help_text }}</small>{% endif %}
+                        {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">إلغاء</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">حفظ البيانات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

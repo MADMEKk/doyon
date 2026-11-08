@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}الحسابات المالية والصناديق - نظام إدارة الشراكة{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4 border-bottom pb-3">
+    <div>
+        <h3 class="fw-bold mb-1 h4">الحسابات المالية والصناديق</h3>
+        <span class="text-muted small">إدارة الخزائن النقدية والحسابات البنكية ومتابعة الأرصدة الحالية</span>
+    </div>
+    <div class="d-flex gap-2 w-100 w-sm-auto">
+        <a href="{% url 'finance:transfer_funds' %}" class="btn btn-outline-primary btn-sm w-100 w-sm-auto">
+            <i class="bi bi-arrow-left-right me-1"></i> تحويل بين الحسابات
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Accounts List -->
+    <div class="col-lg-7">
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2">أرصدة الحسابات والصناديق</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 table-custom table-mobile-cards">
+                    <thead>
+                        <tr>
+                            <th>اسم الحساب</th>
+                            <th>النوع</th>
+                            <th>العملة</th>
+                            <th>الرصيد الافتتاحي</th>
+                            <th>الرصيد الحالي</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in accounts %}
+                            <tr>
+                                <td data-label="اسم الحساب" class="fw-bold">
+                                    <i class="bi {% if a.account_type == 'CASH' %}bi-cash-coin text-success{% else %}bi-bank text-primary{% endif %} me-1"></i>
+                                    {{ a.name }}
+                                </td>
+                                <td data-label="النوع">{{ a.get_account_type_display }}</td>
+                                <td data-label="العملة"><span class="badge bg-light text-dark border">{{ a.currency }}</span></td>
+                                <td data-label="الرصيد الافتتاحي">{{ a.opening_balance|floatformat:2 }}</td>
+                                <td data-label="الرصيد الحالي" class="fw-bold fs-6 {% if a.current_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                    {{ a.current_balance|floatformat:2 }} {{ a.currency }}
+                                </td>
+                                <td data-label="الحالة">
+                                    {% if a.is_active %}
+                                        <span class="badge bg-success">نشط</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">معطل</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted py-4">لا توجد حسابات مسجلة بعد.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create New Account Form -->
+    <div class="col-lg-5">
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2">إضافة حساب مالي / صندوق جديد</h5>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">اسم الحساب *</label>
+                    {{ form.name }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">نوع الحساب *</label>
+                    {{ form.account_type }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">اسم البنك (إن وجد)</label>
+                    {{ form.bank_name }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">رقم الحساب / الآيبان</label>
+                    {{ form.account_number }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">الرصيد الافتتاحي *</label>
+                    {{ form.opening_balance }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">ملاحظات</label>
+                    {{ form.notes }}
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-bold">إنشاء الحساب</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

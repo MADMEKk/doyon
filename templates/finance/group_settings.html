@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}إعدادات المجموعة - {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="bi bi-gear-fill text-primary me-2"></i>إعدادات المجموعة: {{ group.name }}</h4>
+            <p class="text-muted small">تعديل معلومات مساحة العمل، العملة، أو الأرشفة</p>
+        </div>
+        <div>
+            <a href="{% url 'finance:group_members' group.id %}" class="btn btn-outline-info me-2">
+                <i class="bi bi-people me-1"></i> إدارة الأعضاء
+            </a>
+            <a href="{% url 'finance:group_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-return-right me-1"></i> عودة للمجموعات
+            </a>
+        </div>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="col-md-8">
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-pencil-square text-secondary me-2"></i>معلومات المجموعة</h5>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">اسم المجموعة *</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">وصف المجموعة</label>
+                    {{ form.description }}
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">العملة الافتراضية</label>
+                        {{ form.currency }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">شعار المجموعة (اختياري)</label>
+                        {{ form.logo }}
+                        {% if group.logo %}
+                            <div class="mt-2 small text-muted">الشعار الحالي: <a href="{{ group.logo.url }}" target="_blank">عرض</a></div>
+                        {% endif %}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-1"></i> حفظ التغييرات
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Archive & Status Card -->
+    <div class="col-md-4">
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-info-circle text-secondary me-2"></i>تفاصيل المجموعة</h5>
+            <ul class="list-unstyled small mb-4">
+                <li class="mb-2"><strong>النوع:</strong> {{ group.get_group_type_display }}</li>
+                <li class="mb-2"><strong>المنشئ:</strong> {{ group.created_by.username }}</li>
+                <li class="mb-2"><strong>تاريخ الإنشاء:</strong> {{ group.created_at|date:"Y-m-d" }}</li>
+                <li class="mb-2"><strong>الحالة:</strong> 
+                    {% if group.is_archived %}
+                        <span class="badge bg-danger">مؤرشفة</span>
+                    {% else %}
+                        <span class="badge bg-success">نشطة</span>
+                    {% endif %}
+                </li>
+            </ul>
+
+            {% if group.group_type != 'PERSONAL' %}
+                <hr>
+                <h6 class="fw-bold text-danger mb-2"><i class="bi bi-archive me-1"></i>أرشفة المجموعة</h6>
+                <p class="text-muted small">عند أرشفة المجموعة لن تظهر في القائمة اليومية ويمكن استعادتها لاحقاً.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="archive_group" class="btn btn-outline-danger w-100 btn-sm" onclick="return confirm('هل أنت متأكد من تغيير حالة أرشفة هذه المجموعة؟');">
+                        {% if group.is_archived %}
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> إلغاء الأرشفة وتنشيط المجموعة
+                        {% else %}
+                            <i class="bi bi-archive me-1"></i> أرشفة هذه المجموعة
+                        {% endif %}
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

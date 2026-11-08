@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - نظام إدارة الشراكة{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card card-custom p-4 shadow-sm">
+            <h4 class="fw-bold mb-3 pb-2 border-bottom">{{ title }}</h4>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">نوع المعاملة *</label>
+                        {{ form.loan_type }}
+                        <small class="text-muted">دين مستحق علينا أو ممنوح للغير</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">أصل مبلغ الدين *</label>
+                        {{ form.original_amount }}
+                        {% if form.original_amount.errors %}<div class="text-danger small">{{ form.original_amount.errors }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">العملة *</label>
+                        {{ form.currency }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">سعر الصرف</label>
+                        {{ form.exchange_rate }}
+                    </div>
+
+                    <!-- Contact / External Person (Not Registered) -->
+                    <div class="col-12 p-3 bg-light rounded border">
+                        <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person-badge me-1"></i>الطرف المعني بالدين (دائن أو مدين)</h6>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">اختر جهة اتصال مسجلة مسبقاً</label>
+                                {{ form.contact }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">أو اكتب اسم الشخص مباشرة (ليس لديه حساب)</label>
+                                {{ form.external_person_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">رقم هاتف الشخص (اختياري)</label>
+                                {{ form.external_person_phone }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">الحساب المالي المستلم/الدافع *</label>
+                        {{ form.initial_account }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">تاريخ المعاملة *</label>
+                        {{ form.issue_date }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">تاريخ الاستحقاق المتوقع</label>
+                        {{ form.due_date }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">مبلغ فائدة أو رسوم (إن وجد)</label>
+                        {{ form.interest_amount }}
+                    </div>
+
+                    {% if group.group_type != 'PERSONAL' %}
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">المشروع المرتبط</label>
+                        {{ form.project }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">الشريك المسؤول</label>
+                        {{ form.partner }}
+                    </div>
+                    {% endif %}
+
+                    <div class="col-12">
+                        <label class="form-label fw-bold">الشروط والملاحظات</label>
+                        {{ form.notes }}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'finance:loan_list' %}" class="btn btn-outline-secondary">إلغاء</a>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">حفظ وتسجيل الدين</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

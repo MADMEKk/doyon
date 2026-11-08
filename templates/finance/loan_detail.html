@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}تفاصيل الدين #{{ loan.id }} - نظام إدارة الشراكة{% endblock %}
+
+{% block content %}
+<div class="mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
+    <div>
+        <a href="{% url 'finance:loan_list' %}" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-right"></i> العودة لقائمة الديون</a>
+        <h3 class="fw-bold mb-0">
+            {% if loan.loan_type == 'BORROWED' %}دين مستحق علينا للطرف: {% else %}دين مستحق لنا لدى الطرف: {% endif %}
+            <span class="text-primary">{{ loan.contact.name }}</span>
+        </h3>
+    </div>
+    <div>
+        <span class="badge fs-6 {% if loan.status == 'PAID' %}bg-success{% elif loan.status == 'PARTIAL' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+            {{ loan.get_status_display }}
+        </span>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Loan Info Card -->
+    <div class="col-lg-5">
+        <div class="card card-custom p-4 mb-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2">بيانات القرض الأساسية</h5>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+                <span class="text-muted">الطرف الآخر:</span>
+                <strong><a href="{% url 'finance:contact_detail' loan.contact.id %}">{{ loan.contact.name }}</a></strong>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+                <span class="text-muted">أصل المبلغ الأصلي:</span>
+                <span class="fw-bold fs-6">{{ loan.original_amount|floatformat:2 }} <small class="text-muted">{{ loan.currency }}</small></span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+                <span class="text-muted">المبلغ المسدد:</span>
+                <span class="text-success fw-bold">{{ loan.principal_repaid|floatformat:2 }} <small class="text-muted">{{ loan.currency }}</small></span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+                <span class="text-muted">الرصيد المتبقي:</span>
+                <span class="text-danger fw-bold fs-5">{{ loan.remaining_balance|floatformat:2 }} <small class="text-muted">{{ loan.currency }}</small></span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+                <span class="text-muted">تاريخ المعاملة:</span>
+                <span>{{ loan.issue_date|date:"Y-m-d" }}</span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+                <span class="text-muted">تاريخ الاستحقاق:</span>
+                <span>{{ loan.due_date|date:"Y-m-d"|default:"غير محدد" }}</span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+                <span class="text-muted">الحساب المالي الأصلي:</span>
+                <span>{{ loan.initial_account.name }}</span>
+            </div>
+            {% if loan.project %}
+            <div class="d-flex justify-content-between py-2 border-bottom">
+                <span class="text-muted">المشروع المرتبط:</span>
+                <span>{{ loan.project.name }}</span>
+            </div>
+            {% endif %}
+            {% if loan.notes %}
+            <div class="mt-3">
+                <span class="text-muted d-block small mb-1">الشروط والملاحظات:</span>
+                <div class="p-2 bg-light rounded text-secondary small">{{ loan.notes }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Add Repayment Form -->
+        {% if loan.remaining_balance > 0 %}
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2">تسجيل دفعة سداد جديدة</h5>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">تاريخ الدفعة *</label>
+                    {{ form.date }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">مبلغ السداد (أصل الدين) *</label>
+                    {{ form.amount }}
+                    <small class="text-muted">الحد الأقصى المتبقي: {{ loan.remaining_balance|floatformat:2 }}</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">الحساب المالي المستخدم *</label>
+                    {{ form.account }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">الشريك القائم بالعملية</label>
+                    {{ form.partner }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">ملاحظات الدفعة</label>
+                    {{ form.notes }}
+                </div>
+                <button type="submit" class="btn btn-success w-100 fw-bold">
+                    <i class="bi bi-check-circle me-1"></i> تسجيل عملية السداد
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i> هذا الدين تم تسديده بالكامل ولا توجد مبالغ متبقية.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Repayments History -->
+    <div class="col-lg-7">
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2">سجل دفعات السداد المسجلة</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 table-custom">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>المبلغ المسدد</th>
+                            <th>الحساب المالي</th>
+                            <th>الشريك</th>
+                            <th>ملاحظات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in repayments %}
+                            <tr>
+                                <td>{{ r.date|date:"Y-m-d" }}</td>
+                                <td class="fw-bold text-success">{{ r.amount|floatformat:2 }}</td>
+                                <td>{{ r.account.name }}</td>
+                                <td>{{ r.partner.name|default:"-" }}</td>
+                                <td class="small text-muted">{{ r.notes|default:"-" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="5" class="text-center text-muted py-4">لم يتم تسجيل أي دفعات سداد لهذا الدين حتى الآن.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

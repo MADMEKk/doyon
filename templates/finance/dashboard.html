@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if is_personal %}ملفي المالي الشخصي{% else %}لوحة تحكم: {{ group.name }}{% endif %}
+{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 pt-2 pb-3 mb-4 border-bottom">
+    <div>
+        <h2 class="h4 fw-bold mb-1 text-slate-800">
+            {% if is_personal %}
+                <i class="bi bi-person-circle text-primary me-2"></i>ملفي المالي الشخصي
+            {% else %}
+                <i class="bi bi-people-fill text-success me-2"></i>المركز المالي لمجموعة: {{ group.name }}
+            {% endif %}
+        </h2>
+        <span class="text-muted small">
+            {% if is_personal %}
+                هذه المساحة شخصية وسرية تماماً خاصة بك. لا يراها أي شريك آخر.
+            {% else %}
+                بيانات مالية مشتركة لأعضاء وشركاء المجموعة.
+            {% endif %}
+        </span>
+    </div>
+    <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
+        <a href="{% url 'finance:add_income' %}" class="btn btn-success btn-sm flex-fill flex-md-grow-0 px-3 shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> إيراد / دخل
+        </a>
+        <a href="{% url 'finance:add_expense' %}" class="btn btn-danger btn-sm flex-fill flex-md-grow-0 px-3 shadow-sm">
+            <i class="bi bi-dash-circle me-1"></i> مصروف
+        </a>
+        <a href="{% url 'finance:loan_create' %}" class="btn btn-primary btn-sm flex-fill flex-md-grow-0 px-3 shadow-sm">
+            <i class="bi bi-bank me-1"></i> دين / قرض
+        </a>
+        <a href="{% url 'finance:transfer_funds' %}" class="btn btn-outline-secondary btn-sm flex-fill flex-md-grow-0 px-3">
+            <i class="bi bi-arrow-left-right me-1"></i> تحويل
+        </a>
+    </div>
+</div>
+
+<!-- Financial KPI Cards -->
+<div class="row g-3 mb-4">
+    <!-- Cash & Bank Breakdown (Multi-Currency) -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-custom p-3 border-start border-4 border-info">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <span class="text-muted small fw-bold">{% if is_personal %}أرصدة الصناديق والعملات{% else %}السيولة النقدية بالعملات{% endif %}</span>
+                </div>
+                <div class="bg-info-subtle p-2 rounded-circle text-info">
+                    <i class="bi bi-cash-stack fs-5"></i>
+                </div>
+            </div>
+            {% for curr, bal in metrics.currency_breakdown.items %}
+                <div class="d-flex justify-content-between align-items-center {% if not forloop.last %}border-bottom pb-1 mb-1{% endif %}">
+                    <span class="badge bg-light text-dark border">{{ curr }}</span>
+                    <strong class="text-dark fs-6">{{ bal|floatformat:2 }}</strong>
+                </div>
+            {% empty %}
+                <h5 class="fw-bold my-1 text-dark">0.00 <small class="fs-6 fw-normal text-muted">{{ group.currency }}</small></h5>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Debts Owed By Us (Liabilities) -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-custom p-3 border-start border-4 border-danger">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold">{% if is_personal %}ديون عليّ للغير (ملتزم بسدادها){% else %}ديون مستحقة على المجموعة{% endif %}</span>
+                    <h4 class="fw-bold my-1 text-danger">{{ metrics.debts_owed_by_us|floatformat:2 }} <small class="fs-6 fw-normal text-danger">{{ group.currency }}</small></h4>
+                    <span class="badge bg-danger-subtle text-danger">التزامات واجبة الوفاء</span>
+                </div>
+                <div class="bg-danger-subtle p-3 rounded-circle text-danger">
+                    <i class="bi bi-box-arrow-up-right fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debts Owed To Us (Receivables) -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-custom p-3 border-start border-4 border-warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold">{% if is_personal %}مستحقاتي لدى الغير (أقرضتها){% else %}ديون مستحقة للمجموعة لدى الغير{% endif %}</span>
+                    <h4 class="fw-bold my-1 text-primary">{{ metrics.debts_owed_to_us|floatformat:2 }} <small class="fs-6 fw-normal text-primary">{{ group.currency }}</small></h4>
+                    <span class="badge bg-warning-subtle text-warning-emphasis">أموال منتظر استردادها</span>
+                </div>
+                <div class="bg-warning-subtle p-3 rounded-circle text-warning-emphasis">
+                    <i class="bi bi-box-arrow-in-down-left fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operational Net Profit / Balance -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-custom p-3 border-start border-4 {% if metrics.net_profit >= 0 %}border-success{% else %}border-danger{% endif %}">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold">{% if is_personal %}صافي الفائض / العجز الشخصي{% else %}صافي الربح التشغيلي{% endif %}</span>
+                    <h4 class="fw-bold my-1 {% if metrics.net_profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ metrics.net_profit|floatformat:2 }} <small class="fs-6 fw-normal">{{ group.currency }}</small>
+                    </h4>
+                    <small class="text-muted">الدخل ({{ metrics.total_income|floatformat:0 }}) - المصروف ({{ metrics.total_expenses|floatformat:0 }})</small>
+                </div>
+                <div class="{% if metrics.net_profit >= 0 %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %} p-3 rounded-circle">
+                    <i class="bi bi-graph-up-arrow fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart & Partner/Personal Breakdown -->
+<div class="row g-4 mb-4">
+    <!-- Chart: Income vs Expenses -->
+    <div class="col-12 {% if is_personal %}col-lg-12{% else %}col-lg-7{% endif %}">
+        <div class="card card-custom p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-bar-chart-line me-2 text-primary"></i>الأداء المالي الشهري ({{ current_year }})</h6>
+                <span class="badge bg-light text-dark">حركات فعلية</span>
+            </div>
+            <div style="position: relative; height: 260px;">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partner Breakdown only for Shared Groups -->
+    {% if not is_personal %}
+    <div class="col-12 col-lg-5">
+        <div class="card card-custom p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-pie-chart me-2 text-success"></i>وضعية الشركاء والأعضاء</h6>
+                <a href="{% url 'finance:group_members' group.id %}" class="small text-decoration-none">إدارة الأعضاء <i class="bi bi-arrow-left"></i></a>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for p in partners %}
+                    <div class="list-group-item px-0 py-2 border-0 border-bottom">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="fw-bold mb-0">{{ p.name }}</h6>
+                                <small class="text-muted">نسبة الربح: {{ p.profit_share_pct }}% | حصة رأس المال: {{ p.equity_share_pct }}%</small>
+                            </div>
+                            <span class="badge bg-secondary-subtle text-secondary fs-6">{{ p.current_capital|floatformat:2 }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 small text-muted">
+                            <span>النصيب من الأرباح: 
+                                <strong class="{% if p.earned_profit_share >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                    {{ p.earned_profit_share|floatformat:2 }}
+                                </strong>
+                            </span>
+                            <span>صافي المركز التقديري: <strong>{{ p.adjusted_net_position|floatformat:2 }}</strong></span>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-muted text-center py-4">لم يتم تسجيل أعضاء في هذه المجموعة بعد.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Active Loans Alert & Recent Transactions -->
+<div class="row g-4">
+    <!-- Active Loans -->
+    <div class="col-12 col-lg-5">
+        <div class="card card-custom p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-clock-history me-2 text-danger"></i>
+                    {% if is_personal %}ديوني ومستحقاتي القائمة{% else %}الديون النشطة للمجموعة{% endif %}
+                </h6>
+                <a href="{% url 'finance:loan_list' %}" class="small text-decoration-none">عرض الجميع <i class="bi bi-arrow-left"></i></a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small table-mobile-cards">
+                    <thead class="table-light">
+                        <tr>
+                            <th>الطرف (دائن / مدين)</th>
+                            <th>النوع</th>
+                            <th>المتبقي</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in active_loans %}
+                            <tr>
+                                <td data-label="الطرف" class="fw-bold">
+                                    <a href="{% url 'finance:contact_detail' loan.contact.id %}" class="text-decoration-none">
+                                        {{ loan.contact.name }}
+                                    </a>
+                                </td>
+                                <td data-label="النوع">
+                                    {% if loan.loan_type == 'BORROWED' %}
+                                        <span class="badge bg-danger-subtle text-danger">عليّ سداده</span>
+                                    {% else %}
+                                        <span class="badge bg-warning-subtle text-warning-emphasis">مستحق لي</span>
+                                    {% endif %}
+                                </td>
+                                <td data-label="المتبقي" class="fw-bold">{{ loan.remaining_balance|floatformat:2 }}</td>
+                                <td data-label="الإجراء">
+                                    <a href="{% url 'finance:loan_detail' loan.id %}" class="btn btn-outline-primary btn-sm py-1 px-2 w-100 w-md-auto">تفاصيل / سداد</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="4" class="text-center text-muted py-3">لا توجد ديون نشطة حالياً.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="col-12 col-lg-7">
+        <div class="card card-custom p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-journal-text me-2 text-primary"></i>آخر المعاملات المسجلة</h6>
+                <a href="{% url 'finance:transaction_list' %}" class="small text-decoration-none">دفتر العمليات <i class="bi bi-arrow-left"></i></a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small table-mobile-cards">
+                    <thead class="table-light">
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>البيان</th>
+                            <th>الطرف</th>
+                            <th>المبلغ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in recent_transactions %}
+                            <tr>
+                                <td data-label="التاريخ">{{ txn.date|date:"Y-m-d" }}</td>
+                                <td data-label="البيان">
+                                    <span class="fw-bold">{{ txn.description }}</span>
+                                    <br><small class="text-muted">{{ txn.get_transaction_type_display }}</small>
+                                </td>
+                                <td data-label="الطرف">{{ txn.contact.name|default:txn.account.name }}</td>
+                                <td data-label="المبلغ">
+                                    {% if txn.transaction_type == 'INCOME' or txn.transaction_type == 'CAPITAL_IN' or txn.transaction_type == 'LOAN_BORROW' or txn.transaction_type == 'LOAN_RECOVER' %}
+                                        <span class="money-badge-positive">+{{ txn.amount|floatformat:2 }}</span>
+                                    {% else %}
+                                        <span class="money-badge-negative">-{{ txn.amount|floatformat:2 }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="4" class="text-center text-muted py-3">لا توجد معاملات مسجلة بعد.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const ctx = document.getElementById('monthlyChart').getContext('2d');
+    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    
+    const incomeData = {{ monthly_data|safe }}.map(item => item.income);
+    const expenseData = {{ monthly_data|safe }}.map(item => item.expense);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: 'الدخل / الإيرادات',
+                    data: incomeData,
+                    backgroundColor: '#10b981',
+                    borderRadius: 4
+                },
+                {
+                    label: 'المصروفات',
+                    data: expenseData,
+                    backgroundColor: '#ef4444',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', rtl: true }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+{% endblock %}

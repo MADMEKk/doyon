@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}الملف الشخصي وإعدادات الحساب{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12">
+        <h4 class="fw-bold mb-1"><i class="bi bi-person-gear text-primary me-2"></i>إعدادات الحساب والملف الشخصي</h4>
+        <p class="text-muted small">تحديث بيانات حسابك وتغيير كلمة المرور الخاصة بك</p>
+    </div>
+
+    <!-- Personal Info Card -->
+    <div class="col-md-6">
+        <div class="card card-custom h-100 p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-person text-secondary me-2"></i>البيانات الشخصية</h5>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">اسم المستخدم</label>
+                    <input type="text" class="form-control" value="{{ user.username }}" disabled readonly>
+                    <small class="text-muted">اسم المستخدم غير قابل للتعديل.</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">الاسم الأول</label>
+                    {{ profile_form.first_name }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">اسم العائلة</label>
+                    {{ profile_form.last_name }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">البريد الإلكتروني</label>
+                    {{ profile_form.email }}
+                    {% if profile_form.email.errors %}<div class="text-danger small mt-1">{{ profile_form.email.errors }}</div>{% endif %}
+                </div>
+                <div class="mb-3 p-3 bg-light rounded border">
+                    <label class="form-label small fw-bold text-primary"><i class="bi bi-currency-exchange me-1"></i>العملة الافتراضية لمساحتك الشخصية</label>
+                    {{ profile_form.default_currency }}
+                    <small class="text-muted d-block mt-1">تحدد العملة الأساسية لحسابك الشخصي ومحفظتك (مثلاً: USD أو DZD أو EUR أو SAR).</small>
+                </div>
+                <button type="submit" name="update_profile" class="btn btn-primary w-100 mt-2">
+                    <i class="bi bi-save me-1"></i> حفظ التعديلات
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Password Change Card -->
+    <div class="col-md-6">
+        <div class="card card-custom h-100 p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-shield-lock text-secondary me-2"></i>تغيير كلمة المرور</h5>
+            <form method="post">
+                {% csrf_token %}
+                {% if password_form.non_field_errors %}
+                    <div class="alert alert-danger py-2 small">
+                        {{ password_form.non_field_errors }}
+                    </div>
+                {% endif %}
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">كلمة المرور الحالية</label>
+                    {{ password_form.old_password }}
+                    {% if password_form.old_password.errors %}<div class="text-danger small mt-1">{{ password_form.old_password.errors }}</div>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">كلمة المرور الجديدة</label>
+                    {{ password_form.new_password1 }}
+                    {% if password_form.new_password1.errors %}<div class="text-danger small mt-1">{{ password_form.new_password1.errors }}</div>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">تأكيد كلمة المرور الجديدة</label>
+                    {{ password_form.new_password2 }}
+                    {% if password_form.new_password2.errors %}<div class="text-danger small mt-1">{{ password_form.new_password2.errors }}</div>{% endif %}
+                </div>
+                <button type="submit" name="change_password" class="btn btn-outline-danger w-100 mt-2">
+                    <i class="bi bi-key me-1"></i> تحديث كلمة المرور
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
