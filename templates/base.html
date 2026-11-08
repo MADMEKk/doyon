@@ -22,7 +22,7 @@
             --sidebar-bg: #0f172a;
             --sidebar-surface: #1e293b;
             --sidebar-border: #334155;
-            --sidebar-text: #94a3b8;
+            --sidebar-text: #e2e8f0;
             --sidebar-text-active: #ffffff;
             --accent-primary: #0ea5e9;
             --bg-canvas: #f8fafc;
@@ -34,14 +34,22 @@
             color: #1e293b;
             min-height: 100vh;
         }
+        /* Ensure high-contrast for muted text across the app */
+        .text-muted, .text-secondary {
+            color: #475569 !important;
+        }
+        /* Keep sidebar secondary texts visible against dark sidebar background */
+        .sidebar .text-secondary, .sidebar .text-muted {
+            color: #cbd5e1 !important;
+        }
         .sidebar {
-            background-color: var(--sidebar-bg);
+            background-color: #0f172a !important;
             color: #f8fafc;
             min-height: 100vh;
             border-left: 1px solid #1e293b;
         }
         .sidebar .nav-link {
-            color: var(--sidebar-text);
+            color: #cbd5e1;
             font-size: 0.925rem;
             font-weight: 600;
             padding: 0.65rem 0.9rem;
@@ -53,31 +61,31 @@
             transition: all 0.15s ease;
         }
         .sidebar .nav-link:hover {
-            color: #f1f5f9;
-            background-color: rgba(255, 255, 255, 0.06);
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.08);
         }
         .sidebar .nav-link.active {
-            color: var(--sidebar-text-active);
+            color: #ffffff;
             background-color: #0284c7;
             box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
         }
         .sidebar .nav-link i {
             font-size: 1.1rem;
-            color: #94a3b8;
+            color: #93c5fd;
         }
         .sidebar .nav-link:hover i {
-            color: #38bdf8;
+            color: #ffffff;
         }
         .sidebar .nav-link.active i {
             color: #ffffff;
         }
         .brand-header {
             padding: 1.25rem 0.5rem 1rem 0.5rem;
-            border-bottom: 1px solid var(--sidebar-surface);
+            border-bottom: 1px solid #1e293b;
         }
         .group-selector-box {
-            background-color: var(--sidebar-surface);
-            border: 1px solid var(--sidebar-border);
+            background-color: #1e293b;
+            border: 1px solid #334155;
             border-radius: 0.65rem;
             padding: 0.75rem 0.85rem;
             margin-bottom: 1.25rem;
